@@ -9,12 +9,17 @@
     <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body onload="init()">
+<body onload="init(4, 2)">
     <h2>Score: <span>0</span></h2>
+    <div>
+        <button onclick="init(4, 2)" class="res-button hidden">Begginer</button>
+        <button onclick="init(8, 12)" class="res-button hidden">Medium</button>
+        <button onclick="init(12, 30)" class="res-button hidden">Expert</button>
+
+    </div>
     <div class="board-container" oncontextmenu="return false;"></div>
-    <button onclick="init()" class="res-button hidden">Restart Game</button>
-    <button onclick="init()" class="done-button hidden">Play Again</button>
-    <div class="victory hidden">victorious</div>
+
+    <!-- <div class="victory hidden">victorious</div> -->
     <script src="js/utils.js"></script>
     <script src="js/game.js"></script>
 </body>

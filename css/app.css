@@ -3,23 +3,40 @@ body {
     color: white;
 }
 
-.cell {
-    color: rgb(245, 13, 13);
-    background-color: rgb(150, 155, 161);
+button {
+    height: 40px;
     width: 100px;
-    height: 100px;
+    margin: 5px;
+    /* position: static; */
+    border: 3px solid green;
+}
+
+div {
+    display: grid;
+    justify-content: center;
+}
+
+table {
+    border-radius: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cell {
+    border-radius: 5px;
+    color: rgb(245, 13, 13);
+    border-color: aqua;
+    background-color: rgb(150, 155, 161);
+    width: 40px;
+    height: 40px;
     border: groove;
     text-align: center;
     font-size: 1.5em;
 }
 
 .shown {
-    color: rgb(245, 13, 13);
     background-color: rgb(188, 220, 251);
-    width: 100px;
-    height: 100px;
-    border: dashed;
-    text-align: center;
+    border: 3px dotted;
     font-size: 1.5em;
 }
 

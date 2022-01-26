@@ -9,8 +9,6 @@ function buildBoard() {
         board.push([]);
         for (var j = 0; j < size; j++) {
             var cell = { //maybe add i, j
-                i: i,
-                j: j,
                 minesAroundCount: null,
                 isShown: false,
                 isMine: false,
@@ -99,7 +97,7 @@ function matrixConsolePrint() {
         board1.push([]);
         for (var j = 0; j < size; j++) {
             // board[i][j] = '' + i + ' , ' + j;
-            board[i][j] = gBoard[i][j]
+            board[i][j] = gBoard[i][j].minesAroundCount
             board1[i][j] = gBoard[i][j].isMine
         }
     }
