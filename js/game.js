@@ -5,11 +5,20 @@ const FOOD = '.';
 const SUPER_FOOD = '$' */
 const FLAG = '🚩'
 const MINE = '💣'
+const NORMAL_SMILY = '😊'
+const SAD_SMILY = '🤢';
+const WIN_SMILY = '🤠';
+const HINT = '👀'
+const MAN_MINE = '🧨'
 
 //defualt level
+var gMines = [];
 var gGameInterval;
-// var gMarked = 0;
-// var gShown = 0;
+var gLives = 0;
+var gHints = 3;
+var gSafes = 3;
+var gHintToggle = false
+var gBestResult = Infinity;
 var gLevel = {
     size: 4,
     mines: 2
@@ -20,10 +29,11 @@ var gGame = {
     score: 0,
     shownCount: 0,
     markedCount: 0, //How many cells are marked (with a flag)
-    secsPassed: 0
+    secsPassed: 0,
+    isManualMines: false
 };
 
-function init(size, mines) {
+function init(size = 4, mines = 2) {
     //reset values
     clearInterval(gGameInterval)
     gLevel.size = size;
@@ -33,10 +43,24 @@ function init(size, mines) {
     gGame.shownCount = 0;
     gGame.markedCount = 0
     gGame.secsPassed = 0
+    gGame.isManualMines = false;
+    gMines = [];
+    gHints = 3;
+    gSafes = 3;
+    renderHint()
+    toggleSmily()
 
+    //storage:
+    // bestScore()
+
+    //init counter and lives and safe click
+    gLives = 0;
     var elH2 = document.querySelector('h2')
     elH2.innerText = 0.0
-
+    var elLives = document.querySelector('.lives')
+    elLives.innerHTML = `get 3 lives - optional`
+    var elSafe = document.getElementById('safe')
+    elSafe.innerHTML = 'get 3 safe clicks'
 
     gBoard = buildBoard(); //[][] - {i:, j:, value:}
     renderBoard(gBoard, '.board-container');
@@ -44,7 +68,140 @@ function init(size, mines) {
 
 }
 
+function safeClick() {
+    var elSafe = document.getElementById('safe')
+        //render cell
+        //get random + open for 1 sec
+    if (gSafes > 0) {
+        var idx = getRandomInt(0, gLevel.size)
+        var jdx = getRandomInt(0, gLevel.size)
+        while (gBoard[idx][jdx].isShown || gBoard[idx][jdx].isMine) {
+            idx = getRandomInt(0, gLevel.size)
+            jdx = getRandomInt(0, gLevel.size)
+        }
+        var elCell = document.querySelector(`.cell-${idx}-${jdx}`)
+        renderCell(idx, jdx, gBoard[idx][jdx].minesAroundCount);
+        elCell.classList.toggle('shown')
+        elCell.classList.toggle('safe-on')
+
+        //return the cell
+        setTimeout(() => {
+            elCell.classList.toggle('shown')
+            elCell.classList.toggle('safe-on')
+            renderCell(idx, jdx, null);
+
+        }, 2000);
+    }
+
+    //render button
+    if (gSafes === 0) {
+        elSafe.innerHTML = `${gSafes} safe click left`
+    } else {
+        gSafes--
+        elSafe.innerHTML = `${gSafes} safe click left`
+    }
+}
+
+//use session storage - The data is deleted when the user closes the specific browser tab. need fixing
+function bestScore() {
+    var CurrResult = document.querySelector('h2').innerText;
+    var elResults = document.getElementById("results")
+
+    sessionStorage.setItem("lastname", CurrResult);
+
+    //bring to top else bring bottom
+    if (CurrResult < gBestResult && checkVictory()) {
+        gBestResult = CurrResult;
+
+        elResults.innerHTML = "Best result " + sessionStorage.getItem("lastname") + " seconds.\n" + elResults.innerHTML;
+    } else if (checkVictory()) {
+        elResults.innerHTML = elResults.innerHTML + "Best result " + sessionStorage.getItem("lastname") + " seconds.\n";
+    }
+}
+
+function renderHint() {
+
+    var elHints = document.querySelector('.hint-container')
+    var strHTML = '<table><tr>'
+    for (var i = 0; i < gHints; i++) {
+        strHTML += `<td onclick="useHint(this)">${HINT}</td>`
+    }
+    strHTML += '</tr></tbody>'
+    elHints.innerHTML = strHTML;
+}
+
+//defult null cause it comes from another func also
+function useHint(elHint = null, idx = null, jdx = null) {
+    //toggle hiiden
+    if (elHint.innerHTML === HINT) {
+        elHint.classList.toggle('hidden')
+        gHintToggle = true;
+        gHints--;
+    }
+    // 
+
+    if (idx !== null) {
+        for (var i = idx - 1; i <= idx + 1; i++) {
+            if (i < 0 || i >= gLevel.size) continue;
+            for (var j = jdx - 1; j <= jdx + 1; j++) {
+                if (j < 0 || j >= gLevel.size) continue;
+                var elCell = document.querySelector(`.cell-${i}-${j}`)
+                var cell = gBoard[i][j]
+                console.log(i, j)
+                if (!cell.isShown) {
+                    if (cell.isMine) {
+                        renderCell(i, j, MINE);
+                    } else {
+                        renderCell(i, j, cell.minesAroundCount);
+                    }
+                    elCell.classList.add('shown')
+                }
+            }
+        }
+        setTimeout(() => {
+            for (var i = idx - 1; i <= idx + 1; i++) {
+                if (i < 0 || i >= gLevel.size) continue;
+                for (var j = jdx - 1; j <= jdx + 1; j++) {
+                    if (j < 0 || j >= gLevel.size) continue;
+                    var elCell = document.querySelector(`.cell-${i}-${j}`)
+                    var cell = gBoard[i][j]
+                    console.log(i, j)
+                    if (!cell.isShown) {
+                        elCell.classList.remove('shown')
+                        renderCell(i, j, null);
+                    }
+                }
+            }
+            gHintToggle = false;
+        }, 1000);
+    }
+}
+
+function toggleSmily() {
+    var elSmily = document.querySelector('.smily')
+    if (gGame.shownCount === 0) {
+        elSmily.innerHTML = NORMAL_SMILY;
+    } else if (!checkVictory()) {
+        elSmily.innerHTML = SAD_SMILY;
+    } else if (checkVictory()) {
+        elSmily.innerHTML = WIN_SMILY;
+    }
+}
+
+function livesSupportToggle() {
+    var elLives = document.querySelector('.lives')
+
+    if (gLives === 0) {
+        gLives = 3;
+        elLives.innerHTML = `${gLives} lives left`
+
+    } else {
+        elLives.innerHTML = `${gLives - 1} lives left`
+    }
+}
+
 function counter() {
+    //TODO: there's bug in the counter, need fix 
     var elH2 = document.querySelector('h2')
     var startTime = Date.now();
 
@@ -58,6 +215,30 @@ function counter() {
 function cellClicked(elCell, i, j) {
     counter()
 
+    //set mines manually:
+    if (gGame.isManualMines) {
+        gBoard[i][j].isMine = true;
+        gBoard[i][j].minesAroundCount = null;
+        //array for saving mines indexes
+        gMines.push({ i: i, j: j })
+        renderCell(i, j, MAN_MINE)
+        setTimeout(() => {
+            renderCell(i, j, null)
+        }, 1000);
+        if (gMines.length === gLevel.mines) {
+            gGame.isManualMines = false;
+            allNegsCount(gBoard)
+            return
+        }
+        return
+    }
+
+    console.log(gHints, gHintToggle)
+    if (gHintToggle) {
+        useHint(elCell, i, j)
+        return;
+    }
+
     var cell = gBoard[i][j]
 
     // left 1, right 3
@@ -68,10 +249,16 @@ function cellClicked(elCell, i, j) {
             cell = gBoard[i][j]
         }
         if (cell.isMine) {
-            //if mine - game over!
-            renderCell(i, j, MINE);
-            elCell.classList.add('shown')
-            return freezeBoard()
+            if (gLives > 0) {
+                livesSupportToggle()
+                gLives--;
+
+            } else {
+                //if mine - game over!
+                renderCell(i, j, MINE);
+                elCell.classList.add('shown')
+                return freezeBoard()
+            }
         }
         //if cell is'nt mine, without neighbors- MODEL + DOM
         else if (!cell.minesAroundCount) {
@@ -98,7 +285,7 @@ function cellClicked(elCell, i, j) {
             gGame.markedCount--
         }
     }
-    checkGameOver();
+    if (checkVictory()) freezeBoard()
 }
 
 
@@ -169,17 +356,20 @@ function expandShown(elCell, idx, jdx) {
 }
 
 //ASK: need to return something?
-function checkGameOver() {
+function checkVictory() {
     var numAllCells = (gBoard.length) * (gBoard[0].length)
 
     if (gGame.markedCount === gLevel.mines && gGame.shownCount === (numAllCells - gLevel.mines)) {
         console.log('victory')
-        freezeBoard()
+        return true;
+        // freezeBoard()
     }
+    return false;
 }
 
 //function that freeze (render) the click on cells
 function freezeBoard() {
+    bestScore();
     clearInterval(gGameInterval)
         //ASK: how can i do without select all cells
     var elTds = document.querySelectorAll('.board-container td')
@@ -187,6 +377,7 @@ function freezeBoard() {
         elTds[i].removeAttribute("onmouseup");
     }
     gGame.isOn = false;
+    toggleSmily()
 
     //reveal all mines when lose
     var numAllCells = (gBoard.length) * (gBoard[0].length)

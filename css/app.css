@@ -22,6 +22,22 @@ table {
     margin-right: auto;
 }
 
+.lives {
+    background-color: rgb(175, 126, 126);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.smily {
+    width: 100px;
+    height: 50px;
+    font-size: 40px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .cell {
     border-radius: 5px;
     color: rgb(245, 13, 13);
@@ -40,6 +56,10 @@ table {
     font-size: 1.5em;
 }
 
+.safe-on {
+    background-color: rgb(110, 212, 212);
+}
+
 .cell2 {
     color: black;
     background-color: red;
@@ -48,6 +68,10 @@ table {
     border: groove;
     text-align: center;
     font-size: 1.5em;
+}
+
+.hidden {
+    display: none;
 }
 
 */
@@ -76,7 +100,3 @@ table {
     font-size: 30px;
     color: rgb(229, 236, 168);
 } */
-
-.hidden {
-    display: none;
-}

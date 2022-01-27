@@ -17,22 +17,57 @@ function buildBoard() {
             board[i][j] = cell;
         }
     }
-    board = setMinesNegsCount(board)
+    board = setMines(board)
+    board = allNegsCount(board)
     return board;
 }
 
-//set mines, and count them for each cell
-function setMinesNegsCount(board) {
+function setMines(board = gBoard) {
     //put mines randomaly on MODEL
-    for (var i = 0; i < gLevel.mines; i++) {
-        var idx = getRandomInt(0, gLevel.size)
-        var jdx = getRandomInt(0, gLevel.size)
-        while (board[idx][jdx].isMine) {
-            idx = getRandomInt(0, gLevel.size)
-            jdx = getRandomInt(0, gLevel.size)
+    if (!gGame.isManualMines) {
+        for (var i = 0; i < gLevel.mines; i++) {
+            var idx = getRandomInt(0, gLevel.size)
+            var jdx = getRandomInt(0, gLevel.size)
+            while (board[idx][jdx].isMine) {
+                idx = getRandomInt(0, gLevel.size)
+                jdx = getRandomInt(0, gLevel.size)
+            }
+            board[idx][jdx].isMine = true;
+            //array for saving mines indexes
+            gMines.push({ i: idx, j: jdx })
         }
-        board[idx][jdx].isMine = true;
+    } else {
+        //realese the mines from model
+        for (var i = 0; i < gLevel.mines; i++) {
+            var oldMine = gMines.pop();
+
+            gBoard[oldMine.i][oldMine.j].isMine = false
+
+            //maybe delete this
+            // gBoard[oldMine.i][oldMine.j].minesAroundCount = howManyMinesAround(gBoard, oldMine.i, oldMine.j)
+
+        }
     }
+    return board;
+}
+
+function setManualMines(elMan) {
+    //todo canel button
+    // if (!gGame.isManualMines && gMines.length > 0) {
+    if (!gGame.isManualMines) {
+        if (gGame.shownCount === 0) {
+            gGame.isManualMines = true;
+            setMines(gBoard);
+        }
+        console.log('check')
+        return;
+    }
+    return;
+    //maybe false
+}
+
+//set mines, and count them for each cell
+function allNegsCount(board) {
 
     for (var i = 0; i < gLevel.size; i++) {
         for (var j = 0; j < gLevel.size; j++) {
