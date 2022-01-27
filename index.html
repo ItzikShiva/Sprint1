@@ -10,6 +10,11 @@
 </head>
 
 <body onload="init(4, 2)">
+    <h1>MineSweeper</h1>
+    <div class="manual">
+        manual: <br> 1. First click is never a Mine
+        <br> 2. eyes - hints - cell and its neighbors are revealed for a second <br> 3. live - optional. when click, toggle for 3 lives <br> 4. "put 7 boom" - in "real" indexes - only when click<br>5. set manual mines - works only in begginning of game
+    </div>
     <h2>Score: <span>0</span></h2>
     <div>
         <button onclick="init(4, 2)" class="res-button">Begginer</button>
@@ -21,6 +26,7 @@
     <div class="board-container" oncontextmenu="return false;"></div>
     <button onclick="livesSupportToggle()" class="lives">get 3 lives - optional</button>
     <button onclick="safeClick()" id="safe" class="lives">get 3 safe clicks</button>
+    <button onclick="sevenBoom()" id="seven" class="lives">put 7 boom mines</button>
 
     <div class="smily" onclick="init()">😃</div>
     <div id="results">Best result: </div>

@@ -30,7 +30,8 @@ var gGame = {
     shownCount: 0,
     markedCount: 0, //How many cells are marked (with a flag)
     secsPassed: 0,
-    isManualMines: false
+    isManualMines: false,
+    isSevenBoom: false
 };
 
 function init(size = 4, mines = 2) {
@@ -44,6 +45,7 @@ function init(size = 4, mines = 2) {
     gGame.markedCount = 0
     gGame.secsPassed = 0
     gGame.isManualMines = false;
+    gGame.isSevenBoom = false;
     gMines = [];
     gHints = 3;
     gSafes = 3;
@@ -67,6 +69,9 @@ function init(size = 4, mines = 2) {
     matrixConsolePrint()
 
 }
+
+//TODO this func..
+function undo() {}
 
 function safeClick() {
     var elSafe = document.getElementById('safe')
@@ -201,7 +206,8 @@ function livesSupportToggle() {
 }
 
 function counter() {
-    //TODO: there's bug in the counter, need fix 
+    //TODO: there's bug in the counter, need fix - think it fixed
+    clearInterval(gGameInterval)
     var elH2 = document.querySelector('h2')
     var startTime = Date.now();
 
@@ -213,7 +219,7 @@ function counter() {
 }
 
 function cellClicked(elCell, i, j) {
-    counter()
+    if (gGame.shownCount === 0) counter()
 
     //set mines manually:
     if (gGame.isManualMines) {
@@ -233,7 +239,6 @@ function cellClicked(elCell, i, j) {
         return
     }
 
-    console.log(gHints, gHintToggle)
     if (gHintToggle) {
         useHint(elCell, i, j)
         return;
@@ -252,7 +257,11 @@ function cellClicked(elCell, i, j) {
             if (gLives > 0) {
                 livesSupportToggle()
                 gLives--;
-
+                renderCell(i, j, MAN_MINE);
+                setTimeout(() => {
+                    renderCell(i, j, null);
+                }, 1000);
+                //TODO - small render to show its mine and back
             } else {
                 //if mine - game over!
                 renderCell(i, j, MINE);
@@ -370,7 +379,8 @@ function checkVictory() {
 //function that freeze (render) the click on cells
 function freezeBoard() {
     bestScore();
-    clearInterval(gGameInterval)
+    // clearInterval(gGameInterval)
+    counter()
         //ASK: how can i do without select all cells
     var elTds = document.querySelectorAll('.board-container td')
     for (var i = 0; i < elTds.length; i++) {
