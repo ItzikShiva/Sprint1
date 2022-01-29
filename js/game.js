@@ -1,8 +1,6 @@
 'use strict';
 
-/* const WALL = '#';
-const FOOD = '.';
-const SUPER_FOOD = '$' */
+
 const FLAG = '🚩'
 const MINE = '💣'
 const NORMAL_SMILY = '😊'
@@ -23,22 +21,24 @@ var gLevel = {
     size: 4,
     mines: 2
 }
+console.log(gLevel.mines)
 var gBoard;
 var gGame = {
     isOn: false,
-    score: 0,
+    score: 0, //DELETE? - NOT in use
     shownCount: 0,
     markedCount: 0, //How many cells are marked (with a flag)
-    secsPassed: 0,
+    secsPassed: 0, //DELETE? - NOT in use
     isManualMines: false,
     isSevenBoom: false
 };
 
-function init(size = 4, mines = 2) {
+
+function init(size = 4) {
     //reset values
     clearInterval(gGameInterval)
     gLevel.size = size;
-    gLevel.mines = mines;
+    gLevel.mines = (size === 4 ? 2 : (size === 8 ? 12 : 30))
     gGame.isOn = true;
     gGame.score = 0;
     gGame.shownCount = 0;
@@ -74,36 +74,38 @@ function init(size = 4, mines = 2) {
 function undo() {}
 
 function safeClick() {
-    var elSafe = document.getElementById('safe')
-        //render cell
-        //get random + open for 1 sec
-    if (gSafes > 0) {
-        var idx = getRandomInt(0, gLevel.size)
-        var jdx = getRandomInt(0, gLevel.size)
-        while (gBoard[idx][jdx].isShown || gBoard[idx][jdx].isMine) {
-            idx = getRandomInt(0, gLevel.size)
-            jdx = getRandomInt(0, gLevel.size)
-        }
-        var elCell = document.querySelector(`.cell-${idx}-${jdx}`)
-        renderCell(idx, jdx, gBoard[idx][jdx].minesAroundCount);
-        elCell.classList.toggle('shown')
-        elCell.classList.toggle('safe-on')
-
-        //return the cell
-        setTimeout(() => {
+    if (gGame.isOn) {
+        var elSafe = document.getElementById('safe')
+            //render cell
+            //get random + open for 1 sec
+        if (gSafes > 0) {
+            var idx = getRandomInt(0, gLevel.size)
+            var jdx = getRandomInt(0, gLevel.size)
+            while (gBoard[idx][jdx].isShown || gBoard[idx][jdx].isMine) {
+                idx = getRandomInt(0, gLevel.size)
+                jdx = getRandomInt(0, gLevel.size)
+            }
+            var elCell = document.querySelector(`.cell-${idx}-${jdx}`)
+            renderCell(idx, jdx, gBoard[idx][jdx].minesAroundCount);
             elCell.classList.toggle('shown')
             elCell.classList.toggle('safe-on')
-            renderCell(idx, jdx, null);
 
-        }, 2000);
-    }
+            //return the cell
+            setTimeout(() => {
+                elCell.classList.toggle('shown')
+                elCell.classList.toggle('safe-on')
+                renderCell(idx, jdx, null);
 
-    //render button
-    if (gSafes === 0) {
-        elSafe.innerHTML = `${gSafes} safe click left`
-    } else {
-        gSafes--
-        elSafe.innerHTML = `${gSafes} safe click left`
+            }, 2000);
+        }
+
+        //render button
+        if (gSafes === 0) {
+            elSafe.innerHTML = `${gSafes} safe click left`
+        } else {
+            gSafes--
+            elSafe.innerHTML = `${gSafes} safe click left`
+        }
     }
 }
 
@@ -114,25 +116,15 @@ function bestScore() {
 
     sessionStorage.setItem("lastname", CurrResult);
 
+    //    <div id="results">Best result: </div>
     //bring to top else bring bottom
     if (CurrResult < gBestResult && checkVictory()) {
         gBestResult = CurrResult;
 
-        elResults.innerHTML = "Best result " + sessionStorage.getItem("lastname") + " seconds.\n" + elResults.innerHTML;
+        elResults.innerHTML = "Best result " + sessionStorage.getItem("lastname") + " seconds.<br>" + elResults.innerHTML;
     } else if (checkVictory()) {
-        elResults.innerHTML = elResults.innerHTML + "Best result " + sessionStorage.getItem("lastname") + " seconds.\n";
+        elResults.innerHTML = elResults.innerHTML + "Best result " + sessionStorage.getItem("lastname") + " seconds.<br>";
     }
-}
-
-function renderHint() {
-
-    var elHints = document.querySelector('.hint-container')
-    var strHTML = '<table><tr>'
-    for (var i = 0; i < gHints; i++) {
-        strHTML += `<td onclick="useHint(this)">${HINT}</td>`
-    }
-    strHTML += '</tr></tbody>'
-    elHints.innerHTML = strHTML;
 }
 
 //defult null cause it comes from another func also
@@ -152,7 +144,7 @@ function useHint(elHint = null, idx = null, jdx = null) {
                 if (j < 0 || j >= gLevel.size) continue;
                 var elCell = document.querySelector(`.cell-${i}-${j}`)
                 var cell = gBoard[i][j]
-                console.log(i, j)
+                    // console.log(i, j)
                 if (!cell.isShown) {
                     if (cell.isMine) {
                         renderCell(i, j, MINE);
@@ -184,6 +176,7 @@ function useHint(elHint = null, idx = null, jdx = null) {
 
 function toggleSmily() {
     var elSmily = document.querySelector('.smily')
+
     if (gGame.shownCount === 0) {
         elSmily.innerHTML = NORMAL_SMILY;
     } else if (!checkVictory()) {
@@ -191,6 +184,9 @@ function toggleSmily() {
     } else if (checkVictory()) {
         elSmily.innerHTML = WIN_SMILY;
     }
+
+    //render smily init call on html
+    elSmily.outerHTML = `<div class="smily" onclick="init(${gLevel.size})">${elSmily.innerHTML}</div>`
 }
 
 function livesSupportToggle() {
@@ -206,7 +202,6 @@ function livesSupportToggle() {
 }
 
 function counter() {
-    //TODO: there's bug in the counter, need fix - think it fixed
     clearInterval(gGameInterval)
     var elH2 = document.querySelector('h2')
     var startTime = Date.now();
@@ -250,6 +245,7 @@ function cellClicked(elCell, i, j) {
     if (window.event.which === 1 && !cell.isMarked && !cell.isShown) {
         //on First click
         if (gGame.shownCount === 0 && cell.isMine) {
+            console.log('check', cell.isMine)
             firstClick(i, j)
             cell = gBoard[i][j]
         }
@@ -297,22 +293,24 @@ function cellClicked(elCell, i, j) {
     if (checkVictory()) freezeBoard()
 }
 
-
+//finished
 function firstClick(idx, jdx) {
-    var cell = gBoard[idx][jdx]
-    cell.isMine = false;
-    cell.isMarked = false;
-    cell.isShown = false;
 
     //random 1 new mine
     var newMineIdx = getRandomInt(0, gLevel.size)
     var newMineJdx = getRandomInt(0, gLevel.size)
-    while (gBoard[idx][jdx].isMine) {
+    while (gBoard[newMineIdx][newMineJdx].isMine) {
         newMineIdx = getRandomInt(0, gLevel.size)
         newMineJdx = getRandomInt(0, gLevel.size)
     }
     gBoard[newMineIdx][newMineJdx].isMine = true;
     gBoard[newMineIdx][newMineJdx].minesAroundCount = null;
+
+    //reset the old cell to be no mine!
+    var cell = gBoard[idx][jdx]
+    cell.isMine = false;
+    cell.isMarked = false;
+    cell.isShown = false;
 
     //update neihbors count for all:
     for (var i = 0; i < gLevel.size; i++) {
@@ -322,24 +320,6 @@ function firstClick(idx, jdx) {
             }
         }
     }
-
-    /*     //care the neihnors of old mine 
-        for (var i = idx - 1; i <= idx + 1; i++) {
-            if (i < 0 || i >= gLevel.size) continue;
-            for (var j = jdx - 1; j <= jdx + 1; j++) {
-                if (j < 0 || j >= gLevel.size) continue;
-                cell.minesAroundCount = howManyMinesAround(gBoard, i, j)
-            }
-        }
-        // care neighbors of new mine
-        for (var i = newMineIdx - 1; i <= newMineIdx + 1; i++) {
-            if (i < 0 || i >= gLevel.size) continue;
-            for (var j = newMineJdx - 1; j <= newMineJdx + 1; j++) {
-                if (i === newMineIdx && j === newMineJdx) continue;
-                if (j < 0 || j >= gLevel.size) continue;
-                cell.minesAroundCount = howManyMinesAround(gBoard, i, j)
-            }
-        } */
     matrixConsolePrint()
 }
 
@@ -357,7 +337,6 @@ function expandShown(elCell, idx, jdx) {
                 elCell.classList.add('shown')
                 gGame.shownCount++;
                 console.log('count', gGame.shownCount)
-                    //ASK: if the reccursion is ok here. and why??
                 if (!cell.minesAroundCount) expandShown(elCell, i, j)
             }
         }
@@ -381,11 +360,13 @@ function freezeBoard() {
     bestScore();
     // clearInterval(gGameInterval)
     counter()
-        //ASK: how can i do without select all cells
+        //ASK: is "foreach" better the for loop?
     var elTds = document.querySelectorAll('.board-container td')
-    for (var i = 0; i < elTds.length; i++) {
-        elTds[i].removeAttribute("onmouseup");
-    }
+    elTds.forEach(element => element.removeAttribute("onmouseup"));
+    // for (var i = 0; i < elTds.length; i++) {
+    //     elTds[i].removeAttribute("onmouseup");
+    // }
+
     gGame.isOn = false;
     toggleSmily()
 
@@ -397,7 +378,7 @@ function freezeBoard() {
             for (var j = 0; j < gBoard[0].length; j++) {
                 if (gBoard[i][j].isMine) {
                     renderCell(i, j, MINE)
-                    console.log('shiva')
+                        // console.log('shiva')
                 }
             }
         }

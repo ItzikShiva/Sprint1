@@ -1,19 +1,28 @@
 body {
     background-color: black;
     color: white;
+    margin: 0;
+}
+
+h2 {
+    margin: auto;
+    padding: 0%;
 }
 
 button {
-    height: 40px;
+    /* height: 40px;
     width: 100px;
     margin: 5px;
     /* position: static; */
     border: 3px solid green;
+    */
 }
 
 div {
     display: grid;
     justify-content: center;
+    padding-left: 20%;
+    padding-right: 20%;
 }
 
 table {
@@ -33,32 +42,29 @@ table {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    /* margin: 5px; */
 }
 
 .smily {
-    width: 100px;
-    height: 50px;
     font-size: 40px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .cell {
-    border-radius: 5px;
-    color: rgb(245, 13, 13);
-    border-color: aqua;
-    background-color: rgb(150, 155, 161);
+    color: rgb(182, 47, 47);
+    /* border-color: blueviolet; */
+    background-color: rgb(255, 136, 57);
     width: 40px;
     height: 40px;
+    border-radius: 5px;
     border: groove;
     text-align: center;
     font-size: 1.5em;
 }
 
 .shown {
-    background-color: rgb(188, 220, 251);
-    border: 3px dotted;
+    background-color: rgb(255, 225, 191);
+    /* color: blueviolet; */
+    border: solid;
     font-size: 1.5em;
 }
 

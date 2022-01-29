@@ -4,7 +4,6 @@ function buildBoard() {
     var size = gLevel.size;
     var board = [];
 
-
     for (var i = 0; i < size; i++) {
         board.push([]);
         for (var j = 0; j < size; j++) {
@@ -49,6 +48,17 @@ function setMines(board = gBoard) {
         }
     }
     return board;
+}
+
+function renderHint() {
+    var elHints = document.querySelector('.hint-container')
+
+    var strHTML = '<table><tr>Use HINTS:'
+    for (var i = 0; i < gHints; i++) {
+        strHTML += `<td onclick="useHint(this)">${HINT}</td>`
+    }
+    strHTML += '</tr></tbody>'
+    elHints.innerHTML = strHTML;
 }
 
 function sevenBoom() {
